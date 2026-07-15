@@ -1,9 +1,78 @@
+# ==============================
+# Virtual Environments
+# ==============================
 venv/
 venv_airflow/
 venv_evidently/
+
+# ==============================
+# Python
+# ==============================
 __pycache__/
-.pytest_cache/
 *.pyc
-mlruns/
-airflow/logs/
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ==============================
+# Models
+# ==============================
+models/*.pkl
+models/*.pt
+models/*.pth
+
+# ==============================
+# Data
+# ==============================
+data/raw/
+data/processed/
+*.csv
+
+# Keep folder structure
+!data/.gitkeep
+
+# ==============================
+# Secrets
+# ==============================
+.env
+*.env
+*.key
+*.pem
+
+# ==============================
+# Logs
+# ==============================
+logs/
 *.log
+airflow/logs/
+airflow/airflow.db
+
+# ==============================
+# MLflow
+# ==============================
+mlruns/
+mlflow.db
+
+# ==============================
+# Monitoring
+# ==============================
+monitoring/reports/
+
+# ==============================
+# IDE
+# ==============================
+.vscode/
+.idea/
+
+# ==============================
+# OS Files
+# ==============================
+.DS_Store
+Thumbs.db
+
+# ==============================
+# Docker
+# ==============================
+docker-compose.yaml
