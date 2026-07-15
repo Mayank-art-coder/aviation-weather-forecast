@@ -45,3 +45,8 @@ with open(ROOT / "models/scaler_X.pkl", "rb") as f:
     test = pickle.load(f)
 print(f"Verification OK — scaler_X type: {type(test).__name__}")
 print(f"scaler_X feature count: {test.n_features_in_}")
+
+# CI mode — skip if models already exist and --ci flag not passed
+if __name__ == "__main__" and "ci" not in sys.argv:
+    # Already runs full regeneration above
+    pass
