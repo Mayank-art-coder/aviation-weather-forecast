@@ -24,13 +24,19 @@ jobs:
 
       - name: Install dependencies
         run: |
+          pip install numpy==1.26.4
           pip install torch==2.2.0+cpu \
             --index-url https://download.pytorch.org/whl/cpu
-          pip install "numpy<2"
+          
           pip install pandas scikit-learn xgboost \
             imbalanced-learn joblib pyyaml \
             fastapi uvicorn pydantic httpx pytest
-
+            
+      - name: Verify Python packages
+        run: |
+          python -c "import numpy, torch, xgboost; print('NumPy:', numpy.__version__); print('Torch:', torch.__version__); print('XGBoost:', xgboost.__version__)"
+          pip freeze | grep numpy
+      
       - name: Regenerate scalers for CI
         run: python src/regenerate_models.py
         env:
