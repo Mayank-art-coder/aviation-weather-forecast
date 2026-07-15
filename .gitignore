@@ -1,0 +1,9 @@
+venv/
+venv_airflow/
+venv_evidently/
+__pycache__/
+.pytest_cache/
+*.pyc
+mlruns/
+airflow/logs/
+*.log

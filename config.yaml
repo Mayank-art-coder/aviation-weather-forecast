@@ -1,0 +1,74 @@
+# ── DATA ───────────────────────────────────────────────
+data:
+  features_path: data/features/vabb_metar_features_updated.csv
+  raw_path: data/raw/
+  processed_path: data/processed/
+
+# ── MODEL ──────────────────────────────────────────────
+model:
+  tft_path: models/tft_best.pt
+  xgb_pressure_path: models/xgb_pressure_model_6hr.pkl
+  rf_fog_path: models/fog_classifier_rf.pkl
+  scaler_x_path: models/scaler_X.pkl
+  scaler_y_path: models/scaler_y.pkl
+
+# ── FEATURES ───────────────────────────────────────────
+features:
+  feature_cols:
+    - wind_dir_sin
+    - wind_dir_cos
+    - hour_sin
+    - hour_cos
+    - month_sin
+    - month_cos
+    - u_wind
+    - v_wind
+    - pressure_tendency
+    - temp_trend
+    - dewpoint_depression
+    - cooling_rate
+    - monsoon_flag
+    - sea_breeze_phase
+    - wind_speed
+    - gust
+    - pressure
+    - visibility
+    - temp
+    - dewpoint
+  reg_targets:
+    - temp
+    - wind_speed
+    - gust
+    - pressure
+    - visibility
+    - u_wind
+    - v_wind
+
+# ── TRAINING ───────────────────────────────────────────
+training:
+  seq_len: 48
+  horizon: 12
+  batch_size: 512
+  epochs: 30
+  lr: 0.001
+  hidden_size: 64
+  num_layers: 1
+  dropout: 0.6
+  patience: 7
+  seed: 42
+  low_vis_threshold: 1000
+  pos_weight: 50
+  test_split: 0.8
+
+# ── API ────────────────────────────────────────────────
+api:
+  host: 0.0.0.0
+  port: 8000
+
+# ── STATION ────────────────────────────────────────────
+station:
+  icao: VABB
+  name: CSMI Airport Mumbai
+  lat: 19.0896
+  lon: 72.8656
+  elevation_m: 11

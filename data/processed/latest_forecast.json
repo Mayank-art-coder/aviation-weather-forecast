@@ -1,0 +1,68 @@
+{
+  "station": "VABB",
+  "station_name": "CSMI Airport Mumbai",
+  "forecast_time": "2026-07-12T04:30:59.416883+00:00",
+  "issued_for": "IMD Aviation TAF \u2014 CSMI Airport",
+  "horizons": {
+    "T+1hr": {
+      "temperature_c": 30.5,
+      "wind_speed_kt": 11.9,
+      "wind_dir_deg": 237.0,
+      "gust_kt": 20.3,
+      "pressure_hpa": 992.9,
+      "visibility_m": 4213.0
+    },
+    "T+2hr": {
+      "temperature_c": 30.5,
+      "wind_speed_kt": 11.9,
+      "wind_dir_deg": 237.0,
+      "gust_kt": 20.3,
+      "pressure_hpa": 992.9,
+      "visibility_m": 4213.0
+    },
+    "T+3hr": {
+      "temperature_c": 30.5,
+      "wind_speed_kt": 11.9,
+      "wind_dir_deg": 237.0,
+      "gust_kt": 20.3,
+      "pressure_hpa": 992.9,
+      "visibility_m": 4213.0
+    },
+    "T+4hr": {
+      "temperature_c": 30.5,
+      "wind_speed_kt": 11.9,
+      "wind_dir_deg": 237.0,
+      "gust_kt": 20.3,
+      "pressure_hpa": 992.9,
+      "visibility_m": 4213.0
+    },
+    "T+5hr": {
+      "temperature_c": 30.5,
+      "wind_speed_kt": 11.9,
+      "wind_dir_deg": 237.0,
+      "gust_kt": 20.3,
+      "pressure_hpa": 992.9,
+      "visibility_m": 4213.0
+    },
+    "T+6hr": {
+      "temperature_c": 30.5,
+      "wind_speed_kt": 11.9,
+      "wind_dir_deg": 237.0,
+      "gust_kt": 20.3,
+      "pressure_hpa": 992.9,
+      "visibility_m": 4213.0
+    }
+  },
+  "fog_alert": {
+    "low_vis_flag": false,
+    "probability": 0.139,
+    "threshold_m": 1000,
+    "icao_category": "NORMAL"
+  },
+  "model_info": {
+    "pressure_model": "XGBoost",
+    "other_variables": "TemporalFusionTransformer",
+    "fog_classifier": "RandomForest_SMOTE",
+    "horizon_method": "window_shift_option_a"
+  }
+}

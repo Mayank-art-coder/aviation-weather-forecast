@@ -1,0 +1,49 @@
+{
+  "report_type": "target_drift",
+  "timestamp": "2026-07-14T17:32:45.410094+00:00",
+  "n_verified": 36,
+  "overall_rmse": {
+    "visibility_m": 693.1,
+    "temp_c": 0.31
+  },
+  "by_horizon": {
+    "T+1hr": {
+      "visibility_rmse": 693.1,
+      "temp_rmse": 0.7,
+      "n_samples": 6
+    },
+    "T+2hr": {
+      "visibility_rmse": 693.1,
+      "temp_rmse": 0.13,
+      "n_samples": 6
+    },
+    "T+3hr": {
+      "visibility_rmse": 693.1,
+      "temp_rmse": 0.13,
+      "n_samples": 6
+    },
+    "T+4hr": {
+      "visibility_rmse": 693.1,
+      "temp_rmse": 0.13,
+      "n_samples": 6
+    },
+    "T+5hr": {
+      "visibility_rmse": 693.1,
+      "temp_rmse": 0.13,
+      "n_samples": 6
+    },
+    "T+6hr": {
+      "visibility_rmse": 693.1,
+      "temp_rmse": 0.13,
+      "n_samples": 6
+    }
+  },
+  "thresholds": {
+    "visibility_alert": 650,
+    "temp_alert": 1.5
+  },
+  "alerts": {
+    "visibility_drift": true,
+    "temp_drift": false
+  }
+}
