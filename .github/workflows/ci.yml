@@ -26,7 +26,8 @@ jobs:
         run: |
           pip install torch==2.2.0+cpu \
             --index-url https://download.pytorch.org/whl/cpu
-          pip install pandas numpy scikit-learn xgboost \
+          pip install "numpy<2"
+          pip install pandas scikit-learn xgboost \
             imbalanced-learn joblib pyyaml \
             fastapi uvicorn pydantic httpx pytest
 
