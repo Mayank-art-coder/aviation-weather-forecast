@@ -24,13 +24,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install numpy==1.26.4
+          
           pip install torch==2.2.0+cpu \
             --index-url https://download.pytorch.org/whl/cpu
           
           pip install pandas scikit-learn xgboost \
             imbalanced-learn joblib pyyaml \
             fastapi uvicorn pydantic httpx pytest
+
+          pip install --force-reinstall --no-deps numpy==1.26.4
             
       - name: Verify Python packages
         run: |
