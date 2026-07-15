@@ -3,6 +3,7 @@ Regenerates scaler_X.pkl and scaler_y.pkl from the dataset.
 Run once to fix corrupted pickle files.
 """
 import pickle
+import sys
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
