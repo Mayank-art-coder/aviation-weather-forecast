@@ -76,3 +76,4 @@ Thumbs.db
 # Docker
 # ==============================
 docker-compose.yaml
+.env.production
