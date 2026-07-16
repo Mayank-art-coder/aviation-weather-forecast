@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 import json
 
 # ── CONFIG ─────────────────────────────────────────────
-API_URL    = "http://localhost:8000"
+API_URL    = "https://aviation-forecast-api.onrender.com"
 STATION    = "VABB — CSMI Airport, Mumbai"
 REFRESH_S  = 1800   # 30 minutes
 
