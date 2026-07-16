@@ -242,3 +242,45 @@ def model_info():
             "observations":   184099
         }
     }
+
+
+# ── REQUEST LOGGING MIDDLEWARE ─────────────────────────
+from fastapi import Request
+import time
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = time.time()
+    response = await call_next(request)
+    duration = round((time.time() - start) * 1000, 2)
+    logger.info(
+        f"{request.method} {request.url.path} "
+        f"→ {response.status_code} | {duration}ms"
+    )
+    return response
+
+
+# ── METRICS ENDPOINT ───────────────────────────────────
+import psutil
+from datetime import datetime, timezone
+
+_start_time = datetime.now(timezone.utc)
+_request_count = {"total": 0, "predict": 0, "errors": 0}
+
+@app.get("/metrics", tags=["System"], summary="System health metrics")
+def metrics():
+    """
+    Returns CPU, RAM, uptime and request counts.
+    Used by monitoring dashboard.
+    """
+    uptime_s = (datetime.now(timezone.utc) - _start_time).total_seconds()
+    return {
+        "uptime_seconds":   round(uptime_s),
+        "uptime_human":     f"{int(uptime_s//3600)}h {int((uptime_s%3600)//60)}m",
+        "cpu_percent":      psutil.cpu_percent(interval=1),
+        "ram_percent":      psutil.virtual_memory().percent,
+        "ram_used_mb":      round(psutil.virtual_memory().used / 1024**2),
+        "models_loaded":    loader._loaded,
+        "requests":         _request_count,
+        "timestamp":        datetime.now(timezone.utc).isoformat()
+    }

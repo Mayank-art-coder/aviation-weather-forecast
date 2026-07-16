@@ -372,3 +372,18 @@ with st.expander("ℹ️ Model Information"):
                "Random Forest with SMOTE for fog binary classification.")
     st.caption(f"Horizon method: {mi['horizon_method']}")
     st.caption(f"Forecast issued: {forecast['forecast_time']}")
+    
+# ── MONITORING SECTION ─────────────────────────────────
+st.divider()
+st.subheader("🖥️ System Monitoring")
+
+try:
+    m = requests.get(f"{API_URL}/metrics", timeout=5).json()
+    col10, col11, col12, col13 = st.columns(4)
+    col10.metric("API Uptime",    m.get('uptime_human', 'N/A'))
+    col11.metric("CPU Usage",     f"{m.get('cpu_percent', 0):.1f}%")
+    col12.metric("RAM Usage",     f"{m.get('ram_percent', 0):.1f}%")
+    col13.metric("Models Loaded", "✅" if m.get('models_loaded') else "❌")
+    st.caption(f"Last checked: {m.get('timestamp', 'N/A')}")
+except:
+    st.warning("Metrics unavailable — API may be starting up")

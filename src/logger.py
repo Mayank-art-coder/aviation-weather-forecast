@@ -26,3 +26,28 @@ def get_logger(name: str) -> logging.Logger:
     logger.addHandler(fh)
 
     return logger
+
+
+def get_api_logger(name: str) -> logging.Logger:
+    """API-specific logger with rotation — prevents log files growing forever."""
+    from logging.handlers import RotatingFileHandler
+    logger = logging.getLogger(name)
+    if logger.handlers:
+        return logger
+    logger.setLevel(logging.INFO)
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+    # Rotate at 10MB, keep 5 files
+    fh = RotatingFileHandler(
+        LOG_DIR / "api_requests.log",
+        maxBytes  = 10 * 1024 * 1024,
+        backupCount = 5
+    )
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
+    ch = logging.StreamHandler()
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+    return logger
