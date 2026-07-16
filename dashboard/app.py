@@ -26,9 +26,11 @@ st.set_page_config(
 # ── HELPER FUNCTIONS ───────────────────────────────────
 def check_api_health():
     try:
-        r = requests.get(f"{API_URL}/health", timeout=5)
-        return r.json() if r.status_code == 200 else None
-    except:
+        r = requests.get(f"{API_URL}/health", timeout=10)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        st.error(f"Health check failed: {e}")
         return None
 
 # Add this function after imports
@@ -84,7 +86,7 @@ with st.sidebar:
         st.success("🟢 API Online")
     else:
         st.error("🔴 API Offline")
-        st.info("Start API: `uvicorn api.main:app --port 8000`")
+        st.info("Checking Render API...")
 
     st.divider()
     st.subheader("Data Source")
