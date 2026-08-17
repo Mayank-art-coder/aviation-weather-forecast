@@ -85,3 +85,5 @@ src/predict (Copy).py
 src/tft_best_v2.pt
 models/old_model files exp/
 models/old_models_backup/
+src/xgboost_temperature_forecast.py
+models/xgb_temperature_model_6hr.pkl
