@@ -52,6 +52,7 @@ jobs:
           python src/feature_engg_updated.py
           mkdir -p data/features
           cp vabb_metar_features_final.csv data/features/vabb_metar_features_final.csv
+        env:
           PYTHONPATH: .
 
       - name: Regenerate scalers for CI
