@@ -8,7 +8,7 @@ from api.main import app
 
 client = TestClient(app)
 
-def make_observations(n=54):
+def make_observations(n=120):
     base = datetime(2024, 6, 15, 0, 0, 0)
     return [
         {
@@ -43,7 +43,7 @@ def test_model_info():
     assert "XGBoost" in data["ensemble"]
 
 def test_predict_returns_6_horizons():
-    r = client.post("/predict", json={"observations": make_observations(54)})
+    r = client.post("/predict", json={"observations": make_observations(120)})
     assert r.status_code == 200
     data = r.json()
     assert "horizons" in data
@@ -51,7 +51,7 @@ def test_predict_returns_6_horizons():
         assert f"T+{hr}hr" in data["horizons"]
 
 def test_predict_all_variables_in_horizon():
-    r = client.post("/predict", json={"observations": make_observations(54)})
+    r = client.post("/predict", json={"observations": make_observations(120)})
     assert r.status_code == 200
     h1 = r.json()["horizons"]["T+1hr"]
     for key in ["temperature_c","wind_speed_kt","wind_dir_deg",
@@ -59,7 +59,7 @@ def test_predict_all_variables_in_horizon():
         assert key in h1
 
 def test_predict_fog_alert_present():
-    r = client.post("/predict", json={"observations": make_observations(54)})
+    r = client.post("/predict", json={"observations": make_observations(120)})
     assert r.status_code == 200
     fog = r.json()["fog_alert"]
     assert "low_vis_flag" in fog
@@ -71,13 +71,13 @@ def test_predict_too_few_observations():
     assert r.status_code == 422
 
 def test_predict_invalid_wind_dir():
-    obs = make_observations(54)
+    obs = make_observations(120)
     obs[0]["wind_dir"] = 400
     r = client.post("/predict", json={"observations": obs})
     assert r.status_code == 422
 
 def test_predict_6hr_endpoint():
-    r = client.post("/predict/6hr", json={"observations": make_observations(54)})
+    r = client.post("/predict/6hr", json={"observations": make_observations(120)})
     assert r.status_code == 200
     data = r.json()
     assert "predictions" in data
