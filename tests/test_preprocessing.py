@@ -47,8 +47,8 @@ def test_features_adds_monsoon_flag():
 def test_gap_flag_detects_gaps():
     df = make_sample_df()
 
-    # Create a >3-hour gap between row 11 and row 12
-    df.loc[12, 'timestamp'] = df.loc[11, 'timestamp'] + pd.Timedelta(hours=5)
+    # Shift rows after the rolling warm-up to create a real 5-hour gap
+    df.loc[48:, 'timestamp'] += pd.Timedelta(hours=5)
 
     df = clean_metar(df)
     df = engineer_features(df)
