@@ -46,8 +46,8 @@ def test_features_adds_monsoon_flag():
 
 def test_gap_flag_detects_gaps():
     df = make_sample_df()
-    # Insert a 5-hour gap
-    df.loc[10, 'timestamp'] = pd.Timestamp('2024-01-01 15:00')
+    # Insert a 5-hour gap after the rolling-feature warm-up period
+    df.loc[50, 'timestamp'] = pd.Timestamp('2024-01-02 05:00')
     df = clean_metar(df)
     df = engineer_features(df)
     assert df['gap_flag'].sum() >= 1
