@@ -8,14 +8,14 @@ from src.preprocessing import clean_metar, engineer_features
 
 def make_sample_df():
     return pd.DataFrame({
-        'timestamp': pd.date_range('2024-01-01', periods=20, freq='30min'),
-        'wind_dir':   [270]*20,
-        'wind_speed': [10]*20,
-        'gust':       [15]*20,
-        'visibility': [5000]*20,
-        'temp':       [28]*20,
-        'dewpoint':   [22]*20,
-        'pressure':   [1008]*20
+        'timestamp': pd.date_range('2024-01-01', periods=60, freq='30min'),
+        'wind_dir':   [270]*60,
+        'wind_speed': [10]*60,
+        'gust':       [15]*60,
+        'visibility': [5000]*60,
+        'temp':       [28]*60,
+        'dewpoint':   [22]*60,
+        'pressure':   [1008]*60
     })
 
 def test_clean_drops_bad_wind_dir():
