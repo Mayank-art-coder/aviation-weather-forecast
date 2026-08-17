@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-df = pd.read_csv('vabb_metar_cleaned_v2.csv')
+df = pd.read_csv('src/vabb_metar_cleaned_v2.csv')
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 df = df.sort_values('timestamp').reset_index(drop=True)
 
