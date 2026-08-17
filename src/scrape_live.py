@@ -177,3 +177,7 @@ def scrape_recent_metars(days_back: int = 3) -> pd.DataFrame:
     logger.info(f"Saved raw scrape: {outfile} ({len(df)} rows)")
 
     return df
+    
+if __name__ == "__main__":
+    df = scrape_recent_metars(days_back=3)
+    print(df.tail())

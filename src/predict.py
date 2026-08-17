@@ -162,7 +162,6 @@ def _predict_single(history_df: pd.DataFrame, horizon_hr: int) -> dict:
         # Shift window back by horizon to simulate predicting from that point
         end_idx    = len(history_df) - shift_rows
         window_df  = history_df.iloc[max(0, end_idx - SEQ_LEN): end_idx]
-
     window        = window_df[FEATURE_COLS].values
     window_scaled = loader.scaler_X.transform(window)
     X_tensor      = torch.tensor(
@@ -171,11 +170,19 @@ def _predict_single(history_df: pd.DataFrame, horizon_hr: int) -> dict:
 
     with torch.no_grad():
         pred_reg, _, _ = loader.tft(X_tensor)
-
     pred_orig = loader.scaler_y.inverse_transform(pred_reg.numpy())[0]
-
+    temp_pred = float(pred_orig[REG_TARGETS.index('temp')])
     # XGBoost for pressure
-    pressure_pred = float(loader.xgb.predict(window_scaled[-1:, :])[0])
+    pressure_features = [
+    'wind_dir_sin', 'wind_dir_cos', 'hour_sin', 'hour_cos',
+    'month_sin', 'month_cos', 'u_wind', 'v_wind',
+    'pressure_tendency', 'temp_trend', 'dewpoint_depression',
+    'cooling_rate', 'monsoon_flag', 'sea_breeze_phase',
+    'wind_speed', 'gust', 'pressure', 'visibility', 'temp', 'dewpoint'
+    ]
+
+    pressure_input = window_df[pressure_features].tail(1).values
+    pressure_pred = float(loader.xgb.predict(pressure_input)[0])
 
     # u/v → wind direction degrees
     u = float(pred_orig[REG_TARGETS.index('u_wind')])
@@ -183,7 +190,7 @@ def _predict_single(history_df: pd.DataFrame, horizon_hr: int) -> dict:
     wind_dir_pred = float((np.degrees(np.arctan2(u, v)) + 360) % 360)
 
     return {
-        "temperature_c": round(float(pred_orig[REG_TARGETS.index('temp')]),       1),
+        "temperature_c": round(temp_pred,                                        1),
         "wind_speed_kt": round(float(pred_orig[REG_TARGETS.index('wind_speed')]), 1),
         "wind_dir_deg":  round(wind_dir_pred,                                     0),
         "gust_kt":       round(float(pred_orig[REG_TARGETS.index('gust')]),       1),
@@ -224,7 +231,6 @@ def predict_multihorizon(history_df: pd.DataFrame) -> dict:
     missing = [c for c in FEATURE_COLS if c not in history_df.columns]
     if missing:
         raise ValueError(f"Missing feature columns: {missing}")
-
     now = datetime.now(timezone.utc)
 
     # ── Fog probability from RF ────────────────────────
@@ -293,7 +299,17 @@ def predict_6hr(history_df: pd.DataFrame) -> dict:
         pred_reg, pred_cls_logit, attn_weights = loader.tft(X_tensor)
 
     pred_orig     = loader.scaler_y.inverse_transform(pred_reg.numpy())[0]
-    pressure_pred = float(loader.xgb.predict(window_scaled[-1:, :])[0])
+    temp_pred     = float(pred_orig[REG_TARGETS.index('temp')])
+    pressure_features = [
+    'wind_dir_sin', 'wind_dir_cos', 'hour_sin', 'hour_cos',
+    'month_sin', 'month_cos', 'u_wind', 'v_wind',
+    'pressure_tendency', 'temp_trend', 'dewpoint_depression',
+    'cooling_rate', 'monsoon_flag', 'sea_breeze_phase',
+    'wind_speed', 'gust', 'pressure', 'visibility', 'temp', 'dewpoint'
+    ]
+
+    pressure_input = history_df[pressure_features].tail(1).values
+    pressure_pred = float(loader.xgb.predict(pressure_input)[0])
     fog_window    = history_df[FOG_FEATURES].tail(1)
     fog_prob      = float(loader.rf.predict_proba(fog_window)[0][1])
     fog_alert     = bool(fog_prob >= 0.5)
@@ -307,7 +323,7 @@ def predict_6hr(history_df: pd.DataFrame) -> dict:
         "forecast_time": datetime.now(timezone.utc).isoformat(),
         "horizon_hours": 6,
         "predictions": {
-            "temperature_c": round(float(pred_orig[REG_TARGETS.index('temp')]),       1),
+            "temperature_c": round(temp_pred,                                        1),
             "wind_speed_kt": round(float(pred_orig[REG_TARGETS.index('wind_speed')]), 1),
             "wind_dir_deg":  round(wind_dir_pred,                                     0),
             "gust_kt":       round(float(pred_orig[REG_TARGETS.index('gust')]),       1),

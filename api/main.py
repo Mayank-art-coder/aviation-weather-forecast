@@ -144,7 +144,15 @@ def predict(request: BatchMETARRequest):
             )
 
         # Run multi-horizon forecast
+        '''forecast = predict_multihorizon(df)
+        return forecast'''
         forecast = predict_multihorizon(df)
+
+        print("\n" + "="*80)
+        print("FINAL API RESPONSE")
+        print(forecast)
+        print("="*80)
+
         return forecast
 
     except HTTPException:

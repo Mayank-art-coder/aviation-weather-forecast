@@ -31,7 +31,9 @@ FEATURE_COLS = [
     'month_sin','month_cos','u_wind','v_wind',
     'pressure_tendency','temp_trend','dewpoint_depression',
     'cooling_rate','monsoon_flag','sea_breeze_phase',
-    'wind_speed','gust','pressure','visibility','temp','dewpoint'
+    'wind_speed','gust','pressure','visibility','temp','dewpoint',
+    'visibility_velocity','dewpoint_depression_velocity','fog_persistence_memory',
+    'wind_ke','wind_ke_volatility','wind_ke_divergence','u_shear_3h','v_shear_3h'
 ]
 
 REG_TARGETS = ['temp','wind_speed','gust','pressure','visibility','u_wind','v_wind']
@@ -40,11 +42,13 @@ LOW_VIS_THR = 1000
 # ── LOAD DATA ──────────────────────────────────────────
 from pathlib import Path
 BASE_DIR = Path(__file__).parent
-csv_path = BASE_DIR.parent / "Vabb_Metar_Data" / "vabb_metar_features_updated.csv"
+csv_path = BASE_DIR.parent / "data/features/vabb_metar_features_v2.csv"
 df = pd.read_csv(csv_path)
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 df = df.sort_values('timestamp').reset_index(drop=True)
 print(f"Loaded: {len(df)} rows")
+df = df.dropna(subset=FEATURE_COLS + REG_TARGETS).reset_index(drop=True)
+print(f"After dropna for new features: {len(df)} rows")
 
 # ── SCALE ──────────────────────────────────────────────
 split_idx = int(len(df) * 0.8)
@@ -261,7 +265,7 @@ for epoch in range(EPOCHS):
     if val_loss < best_val_loss:
         best_val_loss    = val_loss
         patience_counter = 0
-        torch.save(model.state_dict(), 'tft_best.pt')
+        torch.save(model.state_dict(), 'tft_best_final.pt')
     else:
         patience_counter += 1
         if patience_counter >= PATIENCE:
@@ -276,7 +280,7 @@ print(f"\nBest val loss: {best_val_loss:.4f}")
 
 # ── EVALUATION ─────────────────────────────────────────
 print("\nEvaluating best TFT model...")
-model.load_state_dict(torch.load('tft_best.pt'))
+model.load_state_dict(torch.load('tft_best_final.pt'))
 model.eval()
 
 all_preds, all_true   = [], []
@@ -295,6 +299,7 @@ with torch.no_grad():
 
 preds_orig = scaler_y.inverse_transform(np.concatenate(all_preds))
 true_orig  = scaler_y.inverse_transform(np.concatenate(all_true))
+
 
 # Regression results
 print(f"\n── TFT Regression Results (6hr horizon) ──")
@@ -355,7 +360,7 @@ pd.DataFrame(tft_results).to_csv('tft_results.csv', index=False)
 
 # Save timestamps + predictions for ensemble
 test_timestamps = [
-    df['timestamp'].iloc[split_idx + idx + HORIZON - 1]
+    df['timestamp'].iloc[split_idx + idx + HORIZON - 2]
     for idx in test_ds.indices
 ]
 pred_df = pd.DataFrame({'timestamp': test_timestamps})

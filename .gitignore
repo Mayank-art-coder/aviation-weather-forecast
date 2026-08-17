@@ -77,3 +77,11 @@ Thumbs.db
 # ==============================
 docker-compose.yaml
 .env.production
+
+# Local backup / experimental files
+airflow/dags/metar_forecast_dag.py.save
+output.txt
+src/predict (Copy).py
+src/tft_best_v2.pt
+models/old_model files exp/
+models/old_models_backup/

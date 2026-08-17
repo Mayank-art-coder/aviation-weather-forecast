@@ -17,16 +17,19 @@ FEATURE_COLS = [
     'month_sin','month_cos','u_wind','v_wind',
     'pressure_tendency','temp_trend','dewpoint_depression',
     'cooling_rate','monsoon_flag','sea_breeze_phase',
-    'wind_speed','gust','pressure','visibility','temp','dewpoint'
+    'wind_speed','gust','pressure','visibility','temp','dewpoint',
+    'visibility_velocity','dewpoint_depression_velocity','fog_persistence_memory',
+    'wind_ke','wind_ke_volatility','wind_ke_divergence','u_shear_3h','v_shear_3h'
 ]
 REG_TARGETS = ['temp','wind_speed','gust','pressure','visibility','u_wind','v_wind']
 
 print("Loading data...")
-df = pd.read_csv(ROOT / "data/features/vabb_metar_features_updated.csv")
+df = pd.read_csv(ROOT / "data/features/vabb_metar_features_final.csv")
 df['timestamp'] = pd.to_datetime(df['timestamp'])
 df = df.sort_values('timestamp').reset_index(drop=True)
 print(f"Loaded: {len(df)} rows")
 
+df = df.dropna(subset=FEATURE_COLS + REG_TARGETS).reset_index(drop=True)
 split_idx = int(len(df) * 0.8)
 
 scaler_X = StandardScaler()
@@ -34,16 +37,16 @@ scaler_y = StandardScaler()
 scaler_X.fit(df[FEATURE_COLS].values[:split_idx])
 scaler_y.fit(df[REG_TARGETS].values[:split_idx])
 
-with open(ROOT / "models/scaler_X.pkl", "wb") as f:
+with open(ROOT / "models/scaler_X_final.pkl", "wb") as f:
     pickle.dump(scaler_X, f)
-with open(ROOT / "models/scaler_y.pkl", "wb") as f:
+with open(ROOT / "models/scaler_y_final.pkl", "wb") as f:
     pickle.dump(scaler_y, f)
 
 print("scaler_X.pkl saved")
 print("scaler_y.pkl saved")
 
 # Verify
-with open(ROOT / "models/scaler_X.pkl", "rb") as f:
+with open(ROOT / "models/scaler_X_final.pkl", "rb") as f:
     test = pickle.load(f)
 print(f"Verification OK — scaler_X type: {type(test).__name__}")
 print(f"scaler_X feature count: {test.n_features_in_}")

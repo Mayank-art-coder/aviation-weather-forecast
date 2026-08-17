@@ -124,7 +124,7 @@ def run_forecast(**context):
     # Use last 54 raw rows as observations
     raw_cols = ['timestamp','wind_dir','wind_speed','gust',
                 'visibility','temp','dewpoint','pressure']
-    obs = df[raw_cols].tail(54).copy()
+    obs = df[raw_cols].tail(120).copy()
     obs['timestamp'] = obs['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
     # Handle NaN values
@@ -274,7 +274,7 @@ t10 = PythonOperator(
 )
 
 # Add to flow — runs after drift check regardless of outcome
-[t8, t9] >> t10
+#[t8, t9] >> t10
 
 # ── WIRE TASKS ─────────────────────────────────────────
 t1 = PythonOperator(task_id="check_api",           python_callable=check_api,               dag=dag)
@@ -288,3 +288,4 @@ t8 = PythonOperator(task_id="trigger_alert",       python_callable=send_alert,  
 t9 = EmptyOperator(task_id="no_action",            dag=dag)
 
 t1 >> t2 >> t3 >> t4 >> t5 >> t6 >> t7 >> [t8, t9]
+[t8, t9] >> t10

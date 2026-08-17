@@ -46,6 +46,26 @@ df['dewpoint_depression'] = df['temp'] - df['dewpoint']
 # From Paper 1 (Castillo) — key physics feature for visibility prediction
 df['cooling_rate'] = df['temp'].diff(periods=1)
 
+# ── VISIBILITY VELOCITY + FOG PERSISTENCE (NEW) ────────────────
+df['visibility_velocity'] = df['visibility'].diff(periods=1) * 2
+df['dewpoint_depression_velocity'] = df['dewpoint_depression'].diff(periods=1) * 2
+
+low_vis = (df['visibility'] < 1000).astype(int)
+hours_since_low_vis = (
+    low_vis[::-1].groupby(low_vis[::-1].cumsum()).cumcount()[::-1] * 0.5
+)
+df['fog_persistence_memory'] = np.exp(-hours_since_low_vis / 4)
+
+# ── WIND KE + SHEAR (NEW) ───────────────────────────────────────
+df['wind_ke'] = 0.5 * (df['u_wind']**2 + df['v_wind']**2)
+df['wind_ke_volatility'] = df['wind_ke'].rolling(12).std()
+df['wind_ke_divergence'] = df['wind_ke'].rolling(4).mean() - df['wind_ke'].rolling(48).mean()
+df['u_shear_3h'] = df['u_wind'] - df['u_wind'].shift(6)
+df['v_shear_3h'] = df['v_wind'] - df['v_wind'].shift(6)
+
+# ── DELTA TEMPERATURE TARGET (NEW) ──────────────────────────────
+df['delta_temp'] = df['temp'].shift(-12) - df['temp']
+
 # ── MONSOON FLAG (NEW) ─────────────────────────────
 # Mumbai monsoon: June–September (months 6,7,8,9)
 # Without this, model cannot distinguish June from December
@@ -76,8 +96,8 @@ print(f"Total columns: {len(df.columns)}")
 print(f"Columns: {list(df.columns)}")
 print(df.head(3))
 
-df.to_csv('vabb_metar_features_updated.csv', index=False)
-print("Saved: vabb_metar_features_updated.csv")
+df.to_csv('vabb_metar_features_final.csv', index=False)
+print("Saved: vabb_metar_features_final.csv")
 
 # ── EXPECTED OUTPUT ────────────────────────────────
 # Rows:    ~184,093  (6 lost to cooling_rate diff(1) + 6 to pressure/temp diff(6))

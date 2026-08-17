@@ -52,6 +52,22 @@ def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df['time_gap'] = df['timestamp'].diff().dt.total_seconds() / 60
     df['gap_flag'] = (df['time_gap'] > 180).astype(int)
 
+    # NEW: visibility velocity + fog persistence
+    df['visibility_velocity'] = df['visibility'].diff(periods=1) * 2
+    df['dewpoint_depression_velocity'] = df['dewpoint_depression'].diff(periods=1) * 2
+    low_vis = (df['visibility'] < 1000).astype(int)
+    hours_since_low_vis = (
+        low_vis[::-1].groupby(low_vis[::-1].cumsum()).cumcount()[::-1] * 0.5
+    )
+    df['fog_persistence_memory'] = np.exp(-hours_since_low_vis / 4)
+
+    # NEW: wind KE + shear
+    df['wind_ke'] = 0.5 * (df['u_wind']**2 + df['v_wind']**2)
+    df['wind_ke_volatility'] = df['wind_ke'].rolling(12).std()
+    df['wind_ke_divergence'] = df['wind_ke'].rolling(4).mean() - df['wind_ke'].rolling(48).mean()
+    df['u_shear_3h'] = df['u_wind'] - df['u_wind'].shift(6)
+    df['v_shear_3h'] = df['v_wind'] - df['v_wind'].shift(6)
+
     df = df.dropna()
     logger.info(f"Features engineered: {len(df)} rows, {len(df.columns)} columns")
     return df

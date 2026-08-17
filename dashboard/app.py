@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 import json
 
 # ── CONFIG ─────────────────────────────────────────────
-API_URL    = "https://aviation-weather-forecast.onrender.com"
+API_URL = "http://127.0.0.1:8000"
 STATION    = "VABB — CSMI Airport, Mumbai"
 REFRESH_S  = 1800   # 30 minutes
 
@@ -43,8 +43,7 @@ def load_live_forecast():
             return json.load(f)
     return None
 
-def make_dummy_observations(n=54):
-    """Generate realistic dummy METAR for demo when live data unavailable."""
+def make_dummy_observations(n=120):
     import numpy as np
     base = datetime.now(timezone.utc).replace(
         minute=0, second=0, microsecond=0
@@ -52,7 +51,6 @@ def make_dummy_observations(n=54):
     obs = []
     for i in range(n):
         ts = base + timedelta(minutes=30*i)
-        hr = ts.hour
         obs.append({
             "timestamp":  ts.strftime('%Y-%m-%d %H:%M:%S'),
             "wind_dir":   int(260 + 20*np.sin(i/8)),
@@ -63,8 +61,11 @@ def make_dummy_observations(n=54):
             "dewpoint":   round(21 + 2*np.sin(i/12), 1),
             "pressure":   round(1008 - 0.5*np.cos(i/8), 1)
         })
+    print(f"[DEBUG] Generated {len(obs)} dummy observations")
+    print(f"[DEBUG] Temp range: {min(o['temp'] for o in obs)} - {max(o['temp'] for o in obs)}")
+    print(f"[DEBUG] Vis range:  {min(o['visibility'] for o in obs)} - {max(o['visibility'] for o in obs)}")
     return obs
-
+    
 def fog_color(prob: float) -> str:
     if prob >= 0.5:  return "🔴"
     if prob >= 0.3:  return "🟡"
@@ -137,30 +138,62 @@ st.title("🛬 Aviation Weather Forecast — CSMI Airport")
 st.caption(f"India Meteorological Department | Mumbai | {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
 st.divider()
 
+def get_forecast(observations: list) -> dict:
+    import json
+    try:
+        print(f"[DEBUG] Calling API at {API_URL}/predict")
+        print(f"[DEBUG] Sending {len(observations)} observations")
+        print(f"[DEBUG] First obs: {observations[0]}")
+        print(f"[DEBUG] Last obs:  {observations[-1]}")
+
+        r = requests.post(
+            f"{API_URL}/predict",
+            json    = {"observations": observations},
+            timeout = 30
+        )
+        print(f"[DEBUG] Response status: {r.status_code}")
+
+        if r.status_code == 200:
+            result = r.json()
+            print(f"[DEBUG] T+1 temp: {result['horizons']['T+1hr']['temperature_c']}")
+            print(f"[DEBUG] T+6 temp: {result['horizons']['T+6hr']['temperature_c']}")
+            print(f"[DEBUG] T+1 vis:  {result['horizons']['T+1hr']['visibility_m']}")
+            print(f"[DEBUG] T+6 vis:  {result['horizons']['T+6hr']['visibility_m']}")
+            return result
+        else:
+            print(f"[DEBUG] API error: {r.text}")
+            return None
+    except requests.exceptions.ConnectionError as e:
+        print(f"[DEBUG] Connection failed: {e}")
+        return None
+    except Exception as e:
+        print(f"[DEBUG] Unexpected error: {e}")
+        return None
+        
 # ── GET FORECAST ───────────────────────────────────────
 with st.spinner("Generating forecast..."):
+
     if uploaded is not None:
         df_upload = pd.read_csv(uploaded)
-        # Use raw columns if available
+
         raw_cols = ['timestamp','wind_dir','wind_speed','gust',
                     'visibility','temp','dewpoint','pressure']
+
         if all(c in df_upload.columns for c in raw_cols):
-            obs = df_upload[raw_cols].tail(54).to_dict('records')
+            obs = df_upload[raw_cols].tail(72).to_dict('records')
+            forecast = get_forecast(obs)
         else:
             st.error("CSV must contain: timestamp, wind_dir, wind_speed, gust, visibility, temp, dewpoint, pressure")
             st.stop()
-    else:
-        obs = make_dummy_observations(54)
 
-    if data_source == "Demo data" and live_forecast:
+    elif live_forecast:
         forecast = live_forecast
-        st.info("📡 Showing live forecast from Airflow pipeline")
-    elif data_source == "Demo data":
-        forecast = get_forecast(obs)
-        st.info("🔄 Showing demo forecast — Airflow pipeline not yet run")
-    else:
-        forecast = get_forecast(obs)
+        st.info("📡 Showing latest forecast from Airflow / OGIMET pipeline")
 
+    else:
+        st.error("No latest forecast available. Run the Airflow pipeline first.")
+        st.stop()
+            
 if not forecast:
     st.error("Could not retrieve forecast. Check API is running.")
     st.stop()
